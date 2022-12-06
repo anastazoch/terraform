@@ -1,0 +1,12 @@
+credentials        = "./terraform-credentials.json"
+project_id         = "devops-engineer-assignment"
+region             = "europe-central2"
+cluster_name       = "devops-engineer-assignment-gke"
+node_pool          = "default-node-pool"
+machine_type       = "e2-medium"
+image_type         = "cos_containerd"
+min_count          = 3
+max_count          = 6
+disk_size_gb       = 10
+service_account    = "terraform@devops-engineer-assignment.iam.gserviceaccount.com"
+initial_node_count = 3
