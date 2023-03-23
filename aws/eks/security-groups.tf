@@ -1,5 +1,5 @@
-resource "aws_security_group" "node_group_one" {
-  name_prefix = "node_group_one"
+resource "aws_security_group" "private_sg" {
+  name_prefix = "private_group"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
@@ -13,8 +13,8 @@ resource "aws_security_group" "node_group_one" {
   }
 }
 
-resource "aws_security_group" "node_group_two" {
-  name_prefix = "node_group_two"
+resource "aws_security_group" "public_sg" {
+  name_prefix = "public_group"
   vpc_id      = module.vpc.vpc_id
 
   ingress {

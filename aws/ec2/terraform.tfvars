@@ -1,0 +1,15 @@
+instanceType           = "t2.micro"
+region                  = "eu-south-1"
+availabilityZone        = "eu-south-1a"
+secondaryAvailabiltiyZone = "eu-south-1b"
+instanceTenancy         = "default"
+dnsSupport              = true
+dnsHostNames            = true
+vpcCIDRBlock            = "10.10.0.0/16"
+subnetCIDRBlock         = "10.10.1.0/24"
+secondarySubnetCIDRBlock = "10.10.2.0/24"
+privateIPs              = ["10.10.1.5"]
+destinationCIDRBlocks   = ["0.0.0.0/0"]
+ingressCIDRBlocks       = ["10.0.0.0/16"]
+egressCIDRBlocks        = ["0.0.0.0/0"]
+mapPublicIP             = true
