@@ -1,5 +1,5 @@
-resource "aws_security_group" "alb_security_group" {
-  name        = local.alb_security_group_name
+resource "aws_security_group" "test_alb_sec_grp" {
+  name        = local.alb_security_group
   description = "ALB Security Group"
   vpc_id      = aws_vpc.test_vpc.id
 
@@ -19,12 +19,12 @@ resource "aws_security_group" "alb_security_group" {
   }
 
   tags = {
-    Name = local.alb_security_group_name
+    Name = local.alb_security_group
   }
 }
 
 resource "aws_security_group" "test_asg_sec_grp" {
-  name        = local.asg_security_group_name
+  name        = local.asg_security_group
   description = "ASG Security Group"
   vpc_id      = aws_vpc.test_vpc.id
 
@@ -33,7 +33,7 @@ resource "aws_security_group" "test_asg_sec_grp" {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb_security_group.id]
+    security_groups = [aws_security_group.test_alb_sec_grp.id]
   }
 
   egress {
@@ -44,6 +44,6 @@ resource "aws_security_group" "test_asg_sec_grp" {
   }
 
   tags = {
-    Name = local.asg_security_group_name
+    Name = local.asg_security_group
   }
 }

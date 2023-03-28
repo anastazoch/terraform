@@ -1,18 +1,18 @@
 locals {
-  vpc_name                 = "test_vpc"
-  internet_gateway_name    = "test_inet_gw"
-  public_subnet_name       = "test_pub_sub"
-  private_subnet_name      = "test_priv_sub"
-  public_route_table_name  = "test_pub_rt"
-  private_route_table_name = "test_priv_rt"
-  elastic_ip_name          = "test_eip"
-  nat_gateway_name         = "test_nat_gw"
-  alb_security_group_name  = "test_alb_sec_grp"
-  asg_security_group_name  = "test_asg"
-  launch_template_name     = "test_lnch_tmpl"
-  launch_template_ec2_name = "test_lnch_tmpl_ec2_inst"
-  alb_name                 = "test_alb"
-  target_group_name        = "test_tgt_grp"
+  vpc                 = "test-vpc"
+  internet_gateway    = "test-inet-gw"
+  public_subnet       = "test-pub-sub"
+  private_subnet      = "test-priv-sub"
+  public_route_table  = "test-pub-rt"
+  private_route_table = "test-priv-rt"
+  elastic_ip          = "test-eip"
+  nat_gateway         = "test-nat-gw"
+  alb_security_group  = "test-alb-sec-grp"
+  asg_security_group  = "test-asg"
+  launch_template     = "test-lnch-tmpl"
+  launch_template_ec2 = "test-lnch-tmpl-ec2-inst"
+  alb                 = "test-alb"
+  target_group        = "test-tgt-grp"
 }
 
 variable "region" {
@@ -21,31 +21,25 @@ variable "region" {
   default     = "eu-south-1"
 }
 
-variable "num_of_AZ" {
-  description = "Number of Availability Zones"
-  type        = number
-  default     = 3
+variable "availabilityZones" {
+  type    = list(string)
+  default = ["eu-south-1a", "eu-south-1b", "eu-south-1c"]
 }
 
-variable "vpc_cidr" {
+variable "vpcCIDR" {
   description = "VPC cidr block"
   type        = string
   default     = "172.32.0.0/16"
 }
 
-variable "availability_zonesy" {
-  type    = list(string)
-  default = ["eu-south-1a", "eu-south-1b", "eu-south-1c"]
-}
-
-variable "public_subnet_cidr" {
-  description = "Public Subnet cidr block"
+variable "pubSubCIDR" {
+  description = "Public CIDR blocks"
   type        = list(string)
-  default     = ["172.32.0.0/24", "172.32.1.0/24", "172.132.2.0/24"]
+  default     = ["172.32.0.0/24", "172.32.1.0/24", "172.32.2.0/24"]
 }
 
-variable "private_subnet_cidr" {
-  description = "Private Subnet cidr block"
+variable "privSubCIDR" {
+  description = "Private CIDR blocks"
   type        = list(string)
   default     = ["172.32.50.0/24", "172.32.51.0/24", "172.32.52.0/24"]
 }
@@ -53,46 +47,40 @@ variable "private_subnet_cidr" {
 variable "ami" {
   description = "ami id"
   type        = string
-  default     = "ami-000e50175c5f86214"
+  default     = "ami-0010fdacdadb38bb0"
 }
 
-variable "aws_region" {
-  description = "AWS region name"
-  type        = string
-  default     = "eu-south-1"
-  }
-
-variable "server_port" {
+variable "srvPort" {
   description = "The port the web server will be listening"
   type        = number
   default     = 8080
 }
 
-variable "elb_port" {
+variable "elbPort" {
   description = "The port the elb will be listening"
   type        = number
   default     = 80
 }
 
-variable "instance_type" {
+variable "instType" {
   description = "The type of EC2 Instances to run (e.g. t2.micro)"
   type        = string
   default     = "t2.micro"
 }
 
-variable "min_size" {
+variable "minSize" {
   description = "The minimum number of EC2 Instances in the ASG"
   type        = number
   default     = 2
 }
 
-variable "max_size" {
+variable "maxSize" {
   description = "The maximum number of EC2 Instances in the ASG"
   type        = number
   default     = 5
 }
 
-variable "desired_capacity" {
+variable "desiredCapacity" {
   description = "The desired number of EC2 Instances in the ASG"
   type        = number
   default     = 3

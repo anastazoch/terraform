@@ -1,32 +1,32 @@
 resource "aws_launch_template" "test_lnch_tmlp" {
-  name          = local.launch_template_name
+  name          = local.launch_template
   image_id      = var.ami
-  instance_type = var.instance_type
+  instance_type = var.instType
 
   network_interfaces {
     device_index    = 0
-    security_groups = [aws_security_group.asg_security_group.id]
+    security_groups = [aws_security_group.test_alb_sec_grp.id]
   }
   tag_specifications {
     resource_type = "instance"
 
     tags = {
-    Name = local.launch_template_ec2_name
+    Name = local.launch_template_ec2
     }
   }
 
  user_data = filebase64("${path.module}/install-apache.sh")
 }
 
-resource "aws_autoscaling_group" "auto_scaling_group" {
-  desired_capacity    = var.desired_capacity
-  max_size            = var.max_size
-  min_size            = var.min_size
-  vpc_zone_identifier = [for i in aws_subnet.private_subnet[*] : i.id]
-  target_group_arns   = [aws_lb_target_group.target_group.arn]
+resource "aws_autoscaling_group" "test_asc_grp" {
+  desired_capacity    = var.desiredCapacity
+  max_size            = var.maxSize
+  min_size            = var.minSize
+  vpc_zone_identifier = [for i in aws_subnet.test_priv_sub[*] : i.id]
+  target_group_arns   = [aws_lb_target_group.test_alb_tgt_grp.arn]
 
   launch_template {
-    id      = aws_launch_template.launch_template.id
-    version = aws_launch_template.launch_template.latest_version
+    id      = aws_launch_template.test_lnch_tmlp.id
+    version = aws_launch_template.test_lnch_tmlp.latest_version
   }
 }
