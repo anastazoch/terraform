@@ -1,42 +1,79 @@
 locals {
-  master_name = "openstack-master"
-  worker_name = "openstack-worker"
+  controller_name = "openstack-controller"
+  compute_name = "openstack-compute"
+
+  networks = {
+    external = {
+      libvirt_net          = "ovs-ex",
+      host_bridge          = "br-ex"
+      subnet               = "192.168.132.0/24"
+      ip_offset_controller = 10,
+      ip_offset_compute    = 20
+    },
+    management = {
+      libvirt_net          = "ovs-mgmt",
+      host_bridge          = "br-mgmt"
+      subnet               = "172.16.1.0/24"
+      ip_offset_controller = 10,
+      ip_offset_compute    = 20
+    },
+    storage = {
+      libvirt_net          = "ovs-storage",
+      host_bridge          = "br-storage"
+      subnet               = "172.16.2.0/24"
+      ip_offset_controller = 10,
+      ip_offset_compute    = 20
+    },
+    vxlan = {
+      libvirt_net          = "ovs-vxlan",
+      host_bridge          = "br-vxlan"
+      subnet               = "172.16.3.0/24"
+      ip_offset_controller = 10,
+      ip_offset_compute    = 20
+    },
+    vlan = {
+      libvirt_net          = "ovs-vlan",
+      host_bridge          = "br-vlan"
+      subnet               = "172.16.4.0/24"
+      ip_offset_controller = 10,
+      ip_offset_compute    = 20
+    }
+  }
 }
 
-variable "master_count" {
+variable "controller_node_count" {
   type = number
   default = 2
-  description = "number of master nodes (controller, network)"
+  description = "number of controller nodes (controller, network)"
 }
 
-variable "worker_count" {
+variable "compute_node_count" {
   type = number
   default = 3
-  description = "number of worker nodes (compute)"
+  description = "number of compute nodes (compute)"
 }
 
-variable "os_distro" {
-  type = string
-  default = "ubuntu"
-  description = "Distribution of the operating system of each node"
+variable controller_node {
+  type = object({
+    os_distro     = string
+    os_release    = string
+    memory        = number
+    vcpu          = number
+    os_disk_size  = number
+    networks      = list(string)
+    qemu_agent    = bool
+  })
 }
 
-variable "os_release" {
-  type = string
-  default = "20.04"
-  description = "Version of the operating system of each node"
+variable compute_node {
+  type = object({
+    os_distro          = string
+    os_release         = string
+    memory             = number
+    vcpu               = number
+    os_disk_size       = number
+    stor_disk_size     = number
+    networks           = list(string)
+    qemu_agent         = bool
+  })
 }
-
-variable "os_disk_size" {
-  type = number
-  default = 21474836480
-  describe = "OS disk size in bytes"
-}
-
-variable storage_disk_size {
-  type = number
-  default = 21474836480
-  description = "size of each disk allocated to Ceph in bytes"
-}
-
-variable 

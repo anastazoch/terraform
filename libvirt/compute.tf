@@ -1,62 +1,38 @@
-resource "libvirt_cloudinit_disk" "cloudinit_iso" {
-  name      = "cloudinit.iso"
-  user_data = data.template_file.cloud_init_config
-}
+resource "libvirt_domain" "controller_node" {
+  count  = var.controller_node_count
+  name   = "${local.compute_name}-${count.index + 1}"
+  memory = var.controller_node.memory
+  vcpu   = var.controller_node.vcpu
 
-data "template_file" "cloud_init_config" {
-  template = var.os_distro == 'ubuntu' && var.os_release == '20.04' ? ' ? file("${path.module}/cloud_init_ubuntu_20.04.cfg")  : var.os_distro == 'ubuntu' && var.os_release == '22.04' ? file("${path.module}/cloud_init_ubuntu_22.04.cfg")  : var.os_distro == 'centos' && var.os_release == '8' ? file("${path.module}/cloud_init_centos_8.cfg")  : var.os_distro == 'centos' && var.os_release == '9' ? file("${path.module}/cloud_init_centos_9.cfg")
-}
-
-resource "libvirt_volume" "os_image" {
-  name   = "ubuntu-qcow2"
-  pool   = "default"
-  source = var.os_distro == 'ubuntu' && var.os_release == '20.04' ? ' ? "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64-disk-kvm.img" ' : var.os_distro == 'ubuntu' && var.os_release == '22.04' ? "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img" : var.os_distro == 'centos' && var.os_release == '8' ? "https://cloud.centos.org/centos/8/x86_64/images/CentOS-8-GenericCloud-8.4.2105-20210603.0.x86_64.qcow2" : var.os_distro == 'centos' && var.os_release == '9' ? "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-20230327.0.x86_64.qcow2"
-  format = "qcow2"
-}
-
-resource "libvirt_domain" "master_node" {
-  count  = var.num_of_masters
-  name   = "openstack-master-${count.index}"
-  memory = var.master_mem
-  vcpu   = var.master_cpu_cores
-
-  cloudinit = libvirt_cloudinit_disk.
-
-  network_interface {
-    network_name = "ovs-ex"
-  }
-
-  network_interface {
-    network_name = "ovs-mgmt"
-  }
-
-  console {
-    type        = "pty"
-    target_port = "0"
-    target_type = "serial"
-  }
-
-  console {
-    type        = "pty"
-    target_type = "virtio"
-    target_port = "1"
-  }
+  cloudinit = libvirt_cloudinit_disk.controller_cloudinit_iso.id
 
   disk {
-    volume_id = libvirt_volume.master_main_disk[count.index].id
+    volume_id = element(libvirt_volume.controller_os_volume.*.id, count.index)
   }
-}
-
-resource "libvirt_domain" "worker_node" {
-  count  = var.worker_count
-  name   = "openstack-worker-"
-  memory = "512"
-  vcpu   = 1
-
-  cloudinit = libvirt_cloudinit_disk.commoninit.id
 
   network_interface {
-    network_name = "default"
+    network_id = libvirt_network.ovs_external.id
+    addresses  = ["${cidrhost(local.networks["external"]["subnet"], local.networks["external"]["ip_offset_controller"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_management.id
+    addresses  = ["${cidrhost(local.networks["management"]["subnet"], local.networks["management"]["ip_offset_controller"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_storage.id
+    addresses  = ["${cidrhost(local.networks["storage"]["subnet"], local.networks["storage"]["ip_offset_controller"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_vxlan.id
+    addresses  = ["${cidrhost(local.networks["vxlan"]["subnet"], local.networks["vxlan"]["ip_offset_controller"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_vlan.id
+    addresses  = ["${cidrhost(local.networks["vlan"]["subnet"], local.networks["vlan"]["ip_offset_controller"] + count.index + 1)}"]
   }
 
   # IMPORTANT: this is a known bug on cloud images, since they expect a console
@@ -74,8 +50,63 @@ resource "libvirt_domain" "worker_node" {
     target_port = "1"
   }
 
+  qemu_agent = var.controller_node.qemu_agent
+}
+
+resource "libvirt_domain" "compute_node" {
+  count  = var.compute_node_count
+  name   = "${local.compute_name}-${count.index + 1}"
+  memory = var.controller_node.memory
+  vcpu   = var.controller_node.vcpu
+
+  cloudinit = libvirt_cloudinit_disk.compute_cloudinit_iso.id
+
   disk {
-    volume_id = libvirt_volume.ubuntu-qcow2.id
+    volume_id = element(libvirt_volume.compute_os_volume.*.id, count.index)
+  }
+
+  disk {
+    volume_id = element(libvirt_volume.compute_first_storage_volume.*.id, count.index)
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_external.id
+    addresses  = ["${cidrhost(local.networks["external"]["subnet"], local.networks["external"]["ip_offset_compute"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_management.id
+    addresses  = ["${cidrhost(local.networks["management"]["subnet"], local.networks["management"]["ip_offset_compute"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_storage.id
+    addresses  = ["${cidrhost(local.networks["storage"]["subnet"], local.networks["storage"]["ip_offset_compute"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_vxlan.id
+    addresses  = ["${cidrhost(local.networks["vxlan"]["subnet"], local.networks["vxlan"]["ip_offset_compute"] + count.index + 1)}"]
+  }
+
+  network_interface {
+    network_id = libvirt_network.ovs_vlan.id
+    addresses  = ["${cidrhost(local.networks["vlan"]["subnet"], local.networks["vlan"]["ip_offset_compute"] + count.index + 1)}"]
+  }
+
+  # IMPORTANT: this is a known bug on cloud images, since they expect a console
+  # we need to pass it
+  # https://bugs.launchpad.net/cloud-images/+bug/1573095
+  console {
+    type        = "pty"
+    target_port = "0"
+    target_type = "serial"
+  }
+
+  console {
+    type        = "pty"
+    target_type = "virtio"
+    target_port = "1"
   }
 
   graphics {
@@ -83,4 +114,6 @@ resource "libvirt_domain" "worker_node" {
     listen_type = "address"
     autoport    = true
   }
+
+  qemu_agent = var.compute_node.qemu_agent
 }
