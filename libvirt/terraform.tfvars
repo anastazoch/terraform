@@ -7,7 +7,7 @@ controller_node = {
   memory         = 2048
   vcpu           = 2
   os_disk_size   = 21474836480
-  networks       = ["external", "management", "storage", "vxlan", "vlan"]
+  networks       = ["external", "management", "stor", "vxlan", "vlan"]
   qemu_agent     = true
 }
 
@@ -18,6 +18,6 @@ compute_node = {
   vcpu           = 2
   os_disk_size   = 21474836480
   stor_disk_size = 21474836480
-  networks       = ["external", "management", "storage", "vxlan", "vlan"]
+  networks       = ["external", "management", "stor", "vxlan", "vlan"]
   qemu_agent     = true
 }
