@@ -1,6 +1,6 @@
 resource "libvirt_domain" "controller_node" {
   count     = var.controller_node_count
-  name      = "${local.controller_name}-${count.index + 1}"
+  name      = "${format("%s%02s", local.controller_name_prefix, count.index + 1)}"
   memory    = var.controller_node.memory
   vcpu      = var.controller_node.vcpu
   autostart = false
@@ -12,37 +12,50 @@ resource "libvirt_domain" "controller_node" {
   }
 
   network_interface {
-    #network_name = libvirt_network.ovs_external.id
-    network_name = local.networks["external"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["external"]["subnet"], local.networks["external"]["ip_offset_controller"] + count.index + 1)}"]
+    #network_name = libvirt_network.ovs_management.id
+    network_name = var.networks["management"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_management.id
-    network_name = local.networks["management"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["management"]["subnet"], local.networks["management"]["ip_offset_controller"] + count.index + 1)}"]
+    network_name = var.networks["management"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_stor.id
-    network_name = local.networks["storage"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["storage"]["subnet"], local.networks["storage"]["ip_offset_controller"] + count.index + 1)}"]
+    network_name = var.networks["storage"]["libvirt_name"]
+    wait_for_lease = false
+  }
+
+  network_interface {
+    #network_name = libvirt_network.ovs_stor.id
+    network_name = var.networks["storage"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_vxlan.id
-    network_name = local.networks["vxlan"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["vxlan"]["subnet"], local.networks["vxlan"]["ip_offset_controller"] + count.index + 1)}"]
+    network_name = var.networks["vxlan"]["libvirt_name"]
+    wait_for_lease = false
+  }
+
+  network_interface {
+    #network_name = libvirt_network.ovs_vxlan.id
+    network_name = var.networks["vxlan"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_vlan.id
-    network_name = local.networks["vlan"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["vlan"]["subnet"], local.networks["vlan"]["ip_offset_controller"] + count.index + 1)}"]
+    network_name = var.networks["vlan"]["libvirt_name"]
+    wait_for_lease = false
+  }
+
+  network_interface {
+    #network_name = libvirt_network.ovs_vlan.id
+    network_name = var.networks["vlan"]["libvirt_name"]
     wait_for_lease = false
   }
 
@@ -66,7 +79,7 @@ resource "libvirt_domain" "controller_node" {
 
 resource "libvirt_domain" "compute_node" {
   count  = var.compute_node_count
-  name   = "${local.compute_name}-${count.index + 1}"
+  name   = "${format("%s%02s", local.compute_name_prefix, count.index + 1)}"
   memory = var.compute_node.memory
   vcpu   = var.compute_node.vcpu
   autostart = false
@@ -82,40 +95,53 @@ resource "libvirt_domain" "compute_node" {
   }
 
   network_interface {
-    #network_name = libvirt_network.ovs_external.id
-    network_name = local.networks["external"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["external"]["subnet"], local.networks["external"]["ip_offset_compute"] + count.index + 1)}"]
+    #network_name = libvirt_network.ovs_management.id
+    network_name = var.networks["management"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_management.id
-    network_name = local.networks["management"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["management"]["subnet"], local.networks["management"]["ip_offset_compute"] + count.index + 1)}"]
+    network_name = var.networks["management"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_stor.id
-    network_name = local.networks["storage"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["storage"]["subnet"], local.networks["storage"]["ip_offset_compute"] + count.index + 1)}"]
+    network_name = var.networks["storage"]["libvirt_name"]
+    wait_for_lease = false
+  }
+
+  network_interface {
+    #network_name = libvirt_network.ovs_stor.id
+    network_name = var.networks["storage"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_vxlan.id
-    network_name = local.networks["vxlan"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["vxlan"]["subnet"], local.networks["vxlan"]["ip_offset_compute"] + count.index + 1)}"]
+    network_name = var.networks["vxlan"]["libvirt_name"]
+    wait_for_lease = false
+  }
+
+  network_interface {
+    #network_name = libvirt_network.ovs_vxlan.id
+    network_name = var.networks["vxlan"]["libvirt_name"]
     wait_for_lease = false
   }
 
   network_interface {
     #network_name = libvirt_network.ovs_vlan.id
-    network_name = local.networks["vlan"]["libvirt_name"]
-    addresses  = ["${cidrhost(local.networks["vlan"]["subnet"], local.networks["vlan"]["ip_offset_compute"] + count.index + 1)}"]
+    network_name = var.networks["vlan"]["libvirt_name"]
     wait_for_lease = false
   }
 
+  network_interface {
+    #network_name = libvirt_network.ovs_vlan.id
+    network_name = var.networks["vlan"]["libvirt_name"]
+    wait_for_lease = false
+  }
+  
   # IMPORTANT: this is a known bug on cloud images, since they expect a console
   # we need to pass it
   # https://bugs.launchpad.net/cloud-images/+bug/1573095
