@@ -8,6 +8,20 @@ variable "domain" {
   description = "Domain name, e.g. mydomain.local"
 }          
 
+variable "use_proxy" {
+  type        = bool
+  default     = false
+  description = "Use or not a proxy"
+}
+
+variable "proxy" {
+  type = object({
+    scheme  = string
+    ip_addr = string
+    port    = string
+  })
+}
+
 variable "controller_name" {
   type = string
 }

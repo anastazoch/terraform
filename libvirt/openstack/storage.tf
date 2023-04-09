@@ -4,6 +4,10 @@ data "template_file" "controller_cloud_init_config" {
 
   vars = {
     hostname = "${format("%s%02s.%s", local.controller_name_prefix, count.index + 1, var.domain)}"
+    use_proxy    = var.use_proxy
+    proxy_scheme = var.proxy["scheme"]
+    proxy_ipaddr = var.proxy["ip_addr"]
+    proxy_port   = var.proxy["port"]
   }
 }
 
@@ -12,7 +16,11 @@ data "template_file" "compute_cloud_init_config" {
   template = var.compute_node["os_distro"] == "ubuntu" && var.compute_node["os_release"] == "20.04" ? file("${path.module}/cloud_init_ubuntu_20.04.cfg") : var.compute_node["os_distro"] == "ubuntu" && var.compute_node["os_release"] == "22.04" ? file("${path.module}/cloud_init_ubuntu_22.04.cfg") : var.compute_node["os_distro"] == "centos" && var.compute_node["os_release"] == "8" ? file("${path.module}/cloud_init_centos_8.cfg") : var.compute_node["os_distro"] == "centos" && var.compute_node["os_release"] == "9" ? file("${path.module}/cloud_init_centos_9.cfg") : ""
 
   vars = {
-    hostname = "${format("%s%02s.%s", local.compute_name_prefix, count.index + 1, var.domain)}"
+    hostname     = "${format("%s%02s.%s", local.compute_name_prefix, count.index + 1, var.domain)}"
+    use_proxy    = var.use_proxy
+    proxy_scheme = var.proxy["scheme"]
+    proxy_ipaddr = var.proxy["ip_addr"]
+    proxy_port   = var.proxy["port"]
   }
 }
 

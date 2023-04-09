@@ -4,6 +4,13 @@ controller_name       = "controller"
 compute_name          = "compute"
 controller_node_count = 2
 compute_node_count    = 3
+use_proxy             = true
+
+proxy = {
+  scheme  = "http"
+  ip_addr = "172.16.1.1"
+  port    = "3128"
+}
 
 controller_node = {
   os_distro      = "ubuntu"
